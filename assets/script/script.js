@@ -1,11 +1,15 @@
 const api_key = "87d48032bafb781413b54cc13496bc3e"
 
+var search_history = [];
+
 $(function () {
+
+    init();
 
     $("#search-button").on("click", function() {
         var location = $("#location-input").val();
-        // getWeather(location);
-        getWeather("San Diego");
+        getWeather(location);
+        // getWeather("San Diego");
         
     } );
 
@@ -16,6 +20,7 @@ async function getWeather(location) {
     const forecast_url = "https://api.openweathermap.org/data/2.5/forecast?";
     const weather_url = "https://api.openweathermap.org/data/2.5/weather?";
 
+    // get coordinate of the city
     let requestUrl = geocoding_url.concat(`q=${location}&limit=1&appid=${api_key}`);
 
     $.ajax({
@@ -23,7 +28,7 @@ async function getWeather(location) {
         method:"GET",
     }).then(function(response){
         if(response.length === 0) return;
-            
+        
         let lat = response[0].lat;
         let lon = response[0].lon;
 
@@ -33,9 +38,25 @@ async function getWeather(location) {
         weatherFetch(weather_fetch_url);
         forecastFetch(forecast_fetch_url);
 
+        // add city name to the history only if coordinate is searchable
+        add_to_history(location);
     });
 }
 
+function add_to_history(location) {
+    search_history.push(location);
+    localStorage.setItem("history",JSON.stringify(search_history)); 
+    console.log(search_history);
+}
+
+function init() {
+    var storage = JSON.parse(localStorage.getItem("history"));
+    if (storage) {
+      search_history = storage;
+    }
+
+    console.log(search_history);
+}
 
 function weatherFetch(url) {
     $.ajax({
