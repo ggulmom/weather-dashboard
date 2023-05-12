@@ -9,7 +9,13 @@ $(function () {
     // listener
     $("#search-button").on("click", function() {
         var location = $("#location-input").val();
-        getWeather(location);
+        getWeather(location, true);
+    } );
+
+    $("#clear-button").on("click", function() {
+        search_history = [];
+        localStorage.setItem("history",JSON.stringify(search_history)); 
+        updateHistory();
     } );
 
     // display history if there was any
@@ -17,7 +23,7 @@ $(function () {
 
 });
 
-async function getWeather(location) {
+async function getWeather(location, bAddHistory) {
     const geocoding_url = "https://api.openweathermap.org/geo/1.0/direct?";
     const forecast_url = "https://api.openweathermap.org/data/2.5/forecast?";
     const weather_url = "https://api.openweathermap.org/data/2.5/weather?";
@@ -44,7 +50,7 @@ async function getWeather(location) {
         forecastFetch(forecast_fetch_url);
 
         // add city name to the history only if coordinate is searchable and after weather data loading
-        add_to_history(location);
+        if(bAddHistory) add_to_history(location);
     });
 }
 
@@ -60,9 +66,15 @@ function add_to_history(location) {
 function updateHistory() {
     htmlStr = "";
     search_history.forEach(function(item) {
-        htmlStr += `<a class="waves-effect waves-light btn fullwidth grey black-text">${item}</a>\n`
+        htmlStr += `<a class="waves-effect waves-light btn fullwidth grey black-text searched">${item}</a>\n`
     });
     $("#history-container").html(htmlStr);
+
+    // add click listener
+    $(".searched").on("click", function() {
+        var location = $(this).text();
+        getWeather(location,false);
+    } );
 }
 
 function init() {
