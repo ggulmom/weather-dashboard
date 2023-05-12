@@ -31,7 +31,7 @@ async function getWeather(location) {
         let forecast_fetch_url = forecast_url.concat(`lat=${lat}&lon=${lon}&appid=${api_key}&units=imperial`);
 
         weatherFetch(weather_fetch_url);
-        // forecastFetch(forecast_fetch_url);
+        forecastFetch(forecast_fetch_url);
 
     });
 }
@@ -47,32 +47,56 @@ function weatherFetch(url) {
 };
 
 function updateWeather(item) {
-    console.log(item);
-
     let dt = new Date(item.dt * 1000);
     let yyyy = dt.getFullYear();
     let mm = dt.getMonth() + 1;
     let dd = dt.getDate();
-    let hh = dt.getHours();
     let icon = item.weather[0].icon;
     let icon_url = `https://openweathermap.org/img/wn/${icon}@2x.png`;
     let temperature = item.main.temp;
     let humidity = item.main.humidity;
     let wind = item.wind.speed;
-
     let dateStr = `${mm}/${dd}/${yyyy}`;
     let city = item.name;
 
-    $("#weather-container div #city").text(`${city} (${dateStr})`);
+    $("#weather-container #city").text(`${city} (${dateStr})`);
     $("#weather-container #icon").html(`<img src="${icon_url}"></img`);
-    $("#weather-container div #temperature").text(`Temp: ${temperature} °F`);
-    $("#weather-container div #wind").text(`Wind: ${wind} MPH`);
-    $("#weather-container div #humidity").text(`Humidity: ${humidity} %`);
-
-
-    console.log(dateStr, temperature, humidity, wind);
-    
+    $("#weather-container #temperature").text(`Temp: ${temperature} °F`);
+    $("#weather-container #wind").text(`Wind: ${wind} MPH`);
+    $("#weather-container #humidity").text(`Humidity: ${humidity} %`);
 }
-    // let dt = new Date(data.list[0].dt);
-    // // let date_str = $.datepicker.formatDate('yymmdd', test);
-    // console.log(test);
+
+function forecastFetch(url) {
+    $.ajax({
+        url: url,
+        method: "GET",
+    }).then(function(response) {
+        updateForecast(response);
+    });
+};
+
+function updateForecast(data) {
+    for(i=0;i<5;i++) {
+        var idx = (i+1)*8 - 1;
+        item = data.list[idx];
+
+        let dt = new Date(item.dt * 1000);
+        let yyyy = dt.getFullYear();
+        let mm = dt.getMonth() + 1;
+        let dd = dt.getDate();
+        let icon = item.weather[0].icon;
+        let icon_url = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+        let temperature = item.main.temp;
+        let humidity = item.main.humidity;
+        let wind = item.wind.speed;
+        let dateStr = `${mm}/${dd}/${yyyy}`;
+        // let city = item.name;
+    
+        $(`#forecast-${i+1} #date`).text(`${dateStr}`);
+        $(`#forecast-${i+1} #icon`).html(`<img src="${icon_url}"></img`);
+        $(`#forecast-${i+1} #temperature`).text(`Temp: ${temperature} °F`);
+        $(`#forecast-${i+1} #wind`).text(`Wind: ${wind} MPH`);
+        $(`#forecast-${i+1} #humidity`).text(`Humidity: ${humidity} %`);
+    };
+   
+}
