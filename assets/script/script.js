@@ -6,12 +6,14 @@ $(function () {
 
     init();
 
+    // listener
     $("#search-button").on("click", function() {
         var location = $("#location-input").val();
         getWeather(location);
-        // getWeather("San Diego");
-        
     } );
+
+    // display history if there was any
+    updateHistory()
 
 });
 
@@ -35,18 +37,32 @@ async function getWeather(location) {
         let weather_fetch_url = weather_url.concat(`lat=${lat}&lon=${lon}&appid=${api_key}&units=imperial`);
         let forecast_fetch_url = forecast_url.concat(`lat=${lat}&lon=${lon}&appid=${api_key}&units=imperial`);
 
+        // get current weather
         weatherFetch(weather_fetch_url);
+
+        // get forecast
         forecastFetch(forecast_fetch_url);
 
-        // add city name to the history only if coordinate is searchable
+        // add city name to the history only if coordinate is searchable and after weather data loading
         add_to_history(location);
     });
 }
 
 function add_to_history(location) {
+    // add to history and save
     search_history.push(location);
     localStorage.setItem("history",JSON.stringify(search_history)); 
-    console.log(search_history);
+
+    // update the display
+    updateHistory();
+}
+
+function updateHistory() {
+    htmlStr = "";
+    search_history.forEach(function(item) {
+        htmlStr += `<a class="waves-effect waves-light btn fullwidth grey black-text">${item}</a>\n`
+    });
+    $("#history-container").html(htmlStr);
 }
 
 function init() {
@@ -54,8 +70,6 @@ function init() {
     if (storage) {
       search_history = storage;
     }
-
-    console.log(search_history);
 }
 
 function weatherFetch(url) {
@@ -118,6 +132,5 @@ function updateForecast(data) {
         $(`#forecast-${i+1} #temperature`).text(`Temp: ${temperature} °F`);
         $(`#forecast-${i+1} #wind`).text(`Wind: ${wind} MPH`);
         $(`#forecast-${i+1} #humidity`).text(`Humidity: ${humidity} %`);
-    };
-   
+    }; 
 }
