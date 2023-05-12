@@ -14,25 +14,41 @@ $(function () {
 
 async function getWeather(location) {
     const geocoding_url = "http://api.openweathermap.org/geo/1.0/direct?";
-    var requestUrl = geocoding_url.concat(`q=${location}&limit=1&appid=${api_key}`);
+    const weather_url = "http://api.openweathermap.org/data/2.5/forecast?";
 
-    // fetch(requestUrl)
-    // .then(function (response) {
-    //     return response.json();
-    // })
-    // .then(function (data) {
-    //     if(data.lenght===0) return;
-    //     var lat = data[0].lat;
-    //     var lon = data[0].lon;
-    // });
+    let requestUrl = geocoding_url.concat(`q=${location}&limit=1&appid=${api_key}`);
 
     $.ajax({
         url: requestUrl,
         method:"GET",
     }).then(function(response){
-        console.log(response);
+        if(response.length === 0) return;
+            
+        let lat = response[0].lat;
+        let lon = response[0].lon;
+        // console.log(lat,lon);
+
+        requestUrl = weather_url.concat(`lat=${lat}&lon=${lon}&appid=${api_key}`);
+        return requestUrl;
+    }).then(function(requestUrl) {
+        if(requestUrl != undefined)
+        {
+            console.log('ok');
+            $.ajax({
+                url: requestUrl,
+                method: "GET",
+            }).then(function(response) {
+                processWeatherData(response);
+            });
+        }
+        // console.log(requestUrl);
     });
 
     // console.log(api_call);
 }
 // console.log ("JS loaded");
+
+function processWeatherData(data) {
+    console.log(data);
+    console.log(data.list);
+}
